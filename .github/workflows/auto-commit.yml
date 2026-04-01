@@ -1,0 +1,37 @@
+name: Auto Commit
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Executa a cada 30 minutos
+    - cron: '*/30 * * * *'
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Check for changes
+        run: |
+          if [[ -z $(git status -s) ]]; then
+            echo "Nenhuma mudança para commitar"
+            exit 0
+          fi
+
+      - name: Add and commit changes
+        run: |
+          git add -A
+          git commit -m "feat: atualização automática - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin main
+        continue-on-error: true
